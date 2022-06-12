@@ -1,0 +1,88 @@
+<!doctype html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<title>Info Vis Assignment 1t</title>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css">
+
+<!-- <style>
+    table, th, td {
+        border: 1px solid black;
+        border-collapse: collapse;
+    }
+    
+    p {
+        font-family: "Arial";
+    }
+  .HighUtil{
+      color: red;
+    }
+    .dataIssue {
+        background-color: yellow;
+    }
+    tr:nth-child(even) {background-color:grey;}
+</style> -->
+</head>
+<body>
+
+<div class="container">
+
+
+<!-- Create a div where the graph will take place -->
+<div id="my_dataviz"></div>
+</div>
+
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+<script src="https://d3js.org/d3.v4.js"></script>
+
+<script>
+
+fetch('https://data.gov.sg/api/action/datastore_search?resource_id=83c21090-bd19-4b54-ab6b-d999c251edcf')
+  .then(response => response.json())
+  .then(data => {
+    let carpark = data.result.records;
+    var margin = {top: 10, right: 30, bottom: 20, left: 50},
+    width = 460 - margin.left - margin.right,
+    height = 400 - margin.top - margin.bottom;
+
+// append the svg object to the body of the page
+var svg = d3.select("#my_dataviz")
+  .append("svg")
+    .attr("width", width + margin.left + margin.right)
+    .attr("height", height + margin.top + margin.bottom)
+  .append("g")
+    .attr("transform",
+          "translate(" + margin.left + "," + margin.top + ")");
+
+// Parse the Data
+    //console.log(carpark)
+    tr ='<tr>'
+    markup = ''
+
+    for(var key in carpark) {
+      // console.log(key)
+       item = carpark[key]
+       console.log(item)
+
+
+      
+       metric = "<td>" + key + "</td>" 
+
+       nat = "<td>" + item['national'] + "</td>" 
+       west = "<td>" + item['west'] + "</td>" 
+       east = "<td>" + item['east'] + "</td>" 
+       central = "<td>" + item['central'] + "</td>" 
+       north = "<td>" + item['north'] + "</td>" 
+       south = "<td>" + item['south'] + "</td>" 
+       markup = markup + tr + metric + nat + north + south + east + west +  central +'</tr>'
+    }
+
+  });
+
+
+</script>
+</body>
+</html>
