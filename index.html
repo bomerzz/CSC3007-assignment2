@@ -50,7 +50,7 @@
 
 var margin = {top: 20, right: 160, bottom: 35, left: 150};
 
-var width = 2000 - margin.left - margin.right,
+var width = 1500 - margin.left - margin.right,
     height = 1000 - margin.top - margin.bottom;
 const colors = d3.schemeSpectral[ky.length]
 
@@ -148,9 +148,7 @@ fetch('https://data.gov.sg/api/action/datastore_search?resource_id=83c21090-bd19
           var val = d[1]-d[0]
           var tipCat = ''
           for(x in d.data) {
-            console.log(d.data[x])
             if(val == d.data[x]) {
-              console.log(d.data[x])
                 tipCat = x
                 break
             }
@@ -165,20 +163,21 @@ fetch('https://data.gov.sg/api/action/datastore_search?resource_id=83c21090-bd19
 
 
 
-  
-
+  console.log(color)
 //Draw legend
 var legend = svg.selectAll(".legend")
   .data(colors)
   .enter().append("g")
   .attr("class", "legend")
-  .attr("transform", function(d, i) { return "translate(30," + i * 19 + ")"; });
+  .attr("transform", function(d, i) { 
+    return "translate(30," + i * 19 + ")"; });
  
 legend.append("rect")
   .attr("x", width - 18)
   .attr("width", 18)
   .attr("height", 18)
-  .style("fill", function(d, i) {return colors.slice().reverse()[i];});
+  .style("fill", function(d, i) {
+    return colors.slice().reverse()[i];});
  
 legend.append("text")
   .attr("x", width + 5)
@@ -187,7 +186,6 @@ legend.append("text")
   .style("font-size", "10px")
   .style("text-anchor", "start")
   .text(function(d, i) { 
-    console.log(i)
     return ky[i]
   });
 
