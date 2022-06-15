@@ -63,6 +63,14 @@ fetch('https://data.gov.sg/api/action/datastore_search?resource_id=83c21090-bd19
   .then(data => {
     let carpark = data.result.records;
 
+
+    var dataset = d3.layout.stack()(["redDelicious", "mcintosh", "oranges", "pears"].map(function(fruit) {
+  return carpark.map(function(d) {
+    return {x: parse(d.year), y: +d[fruit]};
+  });
+}));
+
+
     
     var parse = d3.time.format("%Y").parse;
 
