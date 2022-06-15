@@ -1,0 +1,226 @@
+<!doctype html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<title>Info Vis Assignment 1t</title>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css">
+
+<style type="text/css">
+  svg {
+    font: 10px sans-serif;
+    shape-rendering: crispEdges;
+  }
+
+  .axis path,
+  .axis line {
+    fill: none;
+    stroke: #000;
+  }
+ 
+  path.domain {
+    stroke: none;
+  }
+ 
+  .y .tick line {
+    stroke: #ddd;
+  }
+  </style>
+
+</head>
+<body>
+
+<div class="container">
+
+
+<!-- Create a div where the graph will take place -->
+<div id="my_dataviz"></div>
+</div>
+
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+<script src="https://d3js.org/d3.v7.js"></script>
+
+<script>
+
+var margin = {top: 20, right: 160, bottom: 35, left: 30};
+
+var width = 3000 - margin.left - margin.right,
+    height = 1000 - margin.top - margin.bottom;
+const colors = ["#23171b","#271a28","#2b1c33","#2f1e3f","#32204a","#362354","#39255f","#3b2768","#3e2a72","#402c7b","#422f83","#44318b","#453493","#46369b","#4839a2","#493ca8","#493eaf","#4a41b5","#4a44bb","#4b46c0","#4b49c5","#4b4cca","#4b4ecf","#4b51d3","#4a54d7","#4a56db","#4959de","#495ce2","#485fe5","#4761e7","#4664ea","#4567ec","#446aee","#446df0","#426ff2","#4172f3","#4075f5","#3f78f6","#3e7af7","#3d7df7","#3c80f8","#3a83f9","#3985f9","#3888f9","#378bf9","#368df9","#3590f8","#3393f8","#3295f7","#3198f7","#309bf6","#2f9df5","#2ea0f4","#2da2f3","#2ca5f1","#2ba7f0","#2aaaef","#2aaced","#29afec","#28b1ea","#28b4e8","#27b6e6","#27b8e5","#26bbe3","#26bde1","#26bfdf","#25c1dc","#25c3da","#25c6d8","#25c8d6","#25cad3","#25ccd1","#25cecf","#26d0cc","#26d2ca","#26d4c8","#27d6c5","#27d8c3","#28d9c0","#29dbbe","#29ddbb","#2adfb8","#2be0b6","#2ce2b3","#2de3b1","#2ee5ae","#30e6ac","#31e8a9","#32e9a6","#34eba4","#35eca1","#37ed9f","#39ef9c","#3af09a","#3cf197","#3ef295","#40f392","#42f490","#44f58d","#46f68b","#48f788","#4af786","#4df884","#4ff981","#51fa7f","#54fa7d","#56fb7a","#59fb78","#5cfc76","#5efc74","#61fd71","#64fd6f","#66fd6d","#69fd6b","#6cfd69","#6ffe67","#72fe65","#75fe63","#78fe61","#7bfe5f","#7efd5d","#81fd5c","#84fd5a","#87fd58","#8afc56","#8dfc55","#90fb53","#93fb51","#96fa50","#99fa4e","#9cf94d","#9ff84b","#a2f84a","#a6f748","#a9f647","#acf546","#aff444","#b2f343","#b5f242","#b8f141","#bbf03f","#beef3e","#c1ed3d","#c3ec3c","#c6eb3b","#c9e93a","#cce839","#cfe738","#d1e537","#d4e336","#d7e235","#d9e034","#dcdf33","#dedd32","#e0db32","#e3d931","#e5d730","#e7d52f","#e9d42f","#ecd22e","#eed02d","#f0ce2c","#f1cb2c","#f3c92b","#f5c72b","#f7c52a","#f8c329","#fac029","#fbbe28","#fdbc28","#feb927","#ffb727","#ffb526","#ffb226","#ffb025","#ffad25","#ffab24","#ffa824","#ffa623","#ffa323","#ffa022","#ff9e22","#ff9b21","#ff9921","#ff9621","#ff9320","#ff9020","#ff8e1f","#ff8b1f","#ff881e","#ff851e","#ff831d","#ff801d","#ff7d1d","#ff7a1c","#ff781c","#ff751b","#ff721b","#ff6f1a","#fd6c1a","#fc6a19","#fa6719","#f96418","#f76118","#f65f18","#f45c17","#f25916","#f05716","#ee5415","#ec5115","#ea4f14","#e84c14","#e64913","#e44713","#e24412","#df4212","#dd3f11","#da3d10","#d83a10","#d5380f","#d3360f","#d0330e","#ce310d","#cb2f0d","#c92d0c","#c62a0b","#c3280b","#c1260a","#be2409","#bb2309","#b92108","#b61f07","#b41d07","#b11b06","#af1a05","#ac1805","#aa1704","#a81604","#a51403","#a31302","#a11202","#9f1101","#9d1000","#9b0f00","#9a0e00","#980e00","#960d00","#950c00","#940c00","#930c00","#920c00","#910b00","#910c00","#900c00","#900c00","#900c00"];
+
+// var svg = d3.select("body")
+//   .append("svg")
+//   .attr("width", width + margin.left + margin.right)
+//   .attr("height", height + margin.top + margin.bottom)
+//   .append("g")
+//   .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+  const ky = ["Murder", "Serious Hurt", "Outrage Of Modesty", "Rioting", "Robbery", "Housebreaking", "Theft Of Motor Vehicle", "Snatch Theft", "Rape", "Cheating Related Offences"];
+
+fetch('https://data.gov.sg/api/action/datastore_search?resource_id=83c21090-bd19-4b54-ab6b-d999c251edcf')
+  .then(response => response.json())
+  .then(data => {
+    let carpark = data.result.records;
+    console.log(carpark)
+
+    var final_data = []
+    var dict = {};
+    for (let x in carpark) {
+      if(Object.keys(dict).length > 1) {
+        if(dict["year"] !== carpark[x].year.toString()) {
+        final_data.push(dict)
+        dict ={}
+        }
+        
+      }
+
+      if(Object.keys(dict).length < 1) {
+        dict["year"] = carpark[x].year
+      }
+      dict["tp"] = carpark[x].level_2
+      dict["val"] = carpark[x].value
+      //dict[carpark[x].level_2] = carpark[x].value; 
+  }
+  final_data.push(dict)
+
+  console.log(final_data)
+
+  const stackedData = d3.stack()
+        .keys(ky)
+        // return 0 if a month doesn't have a count for member/casual
+        .value((d, key) => d[key] ?? 0)
+        (final_data);
+    console.log(stackedData)
+
+  chart = StackedBarChart(final_data, {
+  x: d => d.year,
+  y: d => d.value / 1e6,
+  z: d => d.tp,
+  xDomain: d3.groupSort(final_data, D => d3.sum(D, d => -d.value), d => d.year),
+  yLabel: "↑ Population (millions)",
+  zDomain: ky,
+  colors: d3.schemeSpectral[ky.length],
+  width,
+  height: 500
+})
+
+  function StackedBarChart(data, {
+  x = (d, i) => i, // given d in data, returns the (ordinal) x-value
+  y = d => d, // given d in data, returns the (quantitative) y-value
+  z = () => 1, // given d in data, returns the (categorical) z-value
+  title, // given d in data, returns the title text
+  marginTop = 30, // top margin, in pixels
+  marginRight = 0, // right margin, in pixels
+  marginBottom = 30, // bottom margin, in pixels
+  marginLeft = 40, // left margin, in pixels
+  width = 640, // outer width, in pixels
+  height = 400, // outer height, in pixels
+  xDomain, // array of x-values
+  xRange = [marginLeft, width - marginRight], // [left, right]
+  xPadding = 0.1, // amount of x-range to reserve to separate bars
+  yType = d3.scaleLinear, // type of y-scale
+  yDomain, // [ymin, ymax]
+  yRange = [height - marginBottom, marginTop], // [bottom, top]
+  zDomain, // array of z-values
+  offset = d3.stackOffsetDiverging, // stack offset method
+  order = d3.stackOrderNone, // stack order method
+  yFormat, // a format specifier string for the y-axis
+  yLabel, // a label for the y-axis
+  colors = d3.schemeTableau10, // array of colors
+} = {}) {
+  // Compute values.
+  const X = d3.map(data, x);
+  const Y = d3.map(data, y);
+  const Z = d3.map(data, z);
+
+  // Compute default x- and z-domains, and unique them.
+  if (xDomain === undefined) xDomain = X;
+  if (zDomain === undefined) zDomain = Z;
+  xDomain = new d3.InternSet(xDomain);
+  zDomain = new d3.InternSet(zDomain);
+
+  // Omit any data not present in the x- and z-domains.
+  const I = d3.range(X.length).filter(i => xDomain.has(X[i]) && zDomain.has(Z[i]));
+
+  // Compute a nested array of series where each series is [[y1, y2], [y1, y2],
+  // [y1, y2], …] representing the y-extent of each stacked rect. In addition,
+  // each tuple has an i (index) property so that we can refer back to the
+  // original data point (data[i]). This code assumes that there is only one
+  // data point for a given unique x- and z-value.
+  const series = d3.stack()
+      .keys(zDomain)
+      .value(([x, I], z) => Y[I.get(z)])
+      .order(order)
+      .offset(offset)
+    (d3.rollup(I, ([i]) => i, i => X[i], i => Z[i]))
+    .map(s => s.map(d => Object.assign(d, {i: d.data[1].get(s.key)})));
+
+  // Compute the default y-domain. Note: diverging stacks can be negative.
+  if (yDomain === undefined) yDomain = d3.extent(series.flat(2));
+
+  // Construct scales, axes, and formats.
+  const xScale = d3.scaleBand(xDomain, xRange).paddingInner(xPadding);
+  const yScale = yType(yDomain, yRange);
+  const color = d3.scaleOrdinal(zDomain, colors);
+  const xAxis = d3.axisBottom(xScale).tickSizeOuter(0);
+  const yAxis = d3.axisLeft(yScale).ticks(height / 60, yFormat);
+
+  // Compute titles.
+  if (title === undefined) {
+    const formatValue = yScale.tickFormat(100, yFormat);
+    title = i => `${X[i]}\n${Z[i]}\n${formatValue(Y[i])}`;
+  } else {
+    const O = d3.map(data, d => d);
+    const T = title;
+    title = i => T(O[i], i, data);
+  }
+
+  const svg = d3.create("svg")
+      .attr("width", width)
+      .attr("height", height)
+      .attr("viewBox", [0, 0, width, height])
+      .attr("style", "max-width: 100%; height: auto; height: intrinsic;");
+
+  svg.append("g")
+      .attr("transform", `translate(${marginLeft},0)`)
+      .call(yAxis)
+      .call(g => g.select(".domain").remove())
+      .call(g => g.selectAll(".tick line").clone()
+          .attr("x2", width - marginLeft - marginRight)
+          .attr("stroke-opacity", 0.1))
+      .call(g => g.append("text")
+          .attr("x", -marginLeft)
+          .attr("y", 10)
+          .attr("fill", "currentColor")
+          .attr("text-anchor", "start")
+          .text(yLabel));
+
+  const bar = svg.append("g")
+    .selectAll("g")
+    .data(series)
+    .join("g")
+      .attr("fill", ([{i}]) => color(Z[i]))
+    .selectAll("rect")
+    .data(d => d)
+    .join("rect")
+      .attr("x", ({i}) => xScale(X[i]))
+      .attr("y", ([y1, y2]) => Math.min(yScale(y1), yScale(y2)))
+      .attr("height", ([y1, y2]) => Math.abs(yScale(y1) - yScale(y2)))
+      .attr("width", xScale.bandwidth());
+
+  if (title) bar.append("title")
+      .text(({i}) => title(i));
+
+  svg.append("g")
+      .attr("transform", `translate(0,${yScale(0)})`)
+      .call(xAxis);
+
+  return Object.assign(svg.node(), {scales: {color}});
+}
+
+});
+</script>
+</body>
+</html>

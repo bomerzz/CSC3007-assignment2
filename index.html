@@ -31,25 +31,30 @@
 </head>
 <body>
 
-<div class="container">
 
+<div>
+  <div id="my_dataviz"></div>
+
+</div>
+
+   
 
 <!-- Create a div where the graph will take place -->
-<div id="my_dataviz"></div>
-</div>
 
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
-<script src="https://d3js.org/d3.v4.js"></script>
+<script src="https://d3js.org/d3.v7.js"></script>
 
 <script>
+  const ky = ["Murder", "Serious Hurt", "Outrage Of Modesty", "Rioting", "Robbery", "Housebreaking", "Theft Of Motor Vehicle", "Snatch Theft", "Rape", "Cheating Related Offences"];
 
-var margin = {top: 20, right: 160, bottom: 35, left: 30};
+var margin = {top: 20, right: 160, bottom: 35, left: 150};
 
-var width = 960 - margin.left - margin.right,
-    height = 500 - margin.top - margin.bottom;
+var width = 2000 - margin.left - margin.right,
+    height = 1000 - margin.top - margin.bottom;
+const colors = d3.schemeSpectral[ky.length]
 
-var svg = d3.select("my_dataviz")
+var svg = d3.select("#my_dataviz")
   .append("svg")
   .attr("width", width + margin.left + margin.right)
   .attr("height", height + margin.top + margin.bottom)
@@ -57,59 +62,220 @@ var svg = d3.select("my_dataviz")
   .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
 
-
 fetch('https://data.gov.sg/api/action/datastore_search?resource_id=83c21090-bd19-4b54-ab6b-d999c251edcf')
   .then(response => response.json())
   .then(data => {
     let carpark = data.result.records;
+    console.log(carpark)
+
+    var final_data = []
+    var dict = {};
+    for (let x in carpark) {
+      if(Object.keys(dict).length > 1) {
+        if(dict["year"] !== carpark[x].year.toString()) {
+        final_data.push(dict)
+        dict ={}
+        }
+        
+      }
+
+      if(Object.keys(dict).length < 1) {
+        dict["year"] = carpark[x].year
+      }
+      dict[carpark[x].level_2] = carpark[x].value; 
+
+  }
+  final_data.push(dict)
+
+  console.log(final_data)
+
+  const stackedData = d3.stack()
+        .keys(ky)
+        // return 0 if a month doesn't have a count for member/casual
+        .value((d, key) => d[key] ?? 0)
+        (final_data);
+    console.log(stackedData)
 
 
-    var dataset = d3.layout.stack()(["redDelicious", "mcintosh", "oranges", "pears"].map(function(fruit) {
-  return carpark.map(function(d) {
-    return {x: parse(d.year), y: +d[fruit]};
+
+  var xLabel = d3.map(final_data, function (d) { return (d.year) })
+  console.log(xLabel)
+
+  var x = d3.scaleBand()
+      .domain(xLabel)
+      .range([0, width])
+      .padding([0.2])
+  svg.append("g")
+    .attr("transform", "translate(0," + height + ")")
+    .call(d3.axisBottom(x).tickSizeOuter(0));
+
+  // Add Y axis
+  var y = d3.scaleLinear()
+    .domain([0, 20000])
+    .range([ height, 0 ]);
+  svg.append("g")
+    .call(d3.axisLeft(y));
+  // color palette = one color per subgroup
+  var color = d3.scaleOrdinal()
+    .domain(stackedData[0].map(function(d) { return d.x; }))
+    .range(colors)
+
+  //stack the data? --> stack per subgroup
+
+
+
+  // Show the bars
+  svg.append("g")
+    .selectAll("g")
+    // Enter in the stack data = loop key per key = group per group
+    .data(stackedData)
+    .enter().append("g")
+      .style("fill", function(d) { return color(d.key); })
+      .selectAll("rect")
+      // enter a second time = loop subgroup per subgroup to add all rectangles
+      .data(function(d) { return d; })
+      .enter().append("rect")
+        .attr("x", function(d) { return x(d.data.year); })
+        .attr("y", function(d) { return y(d[1]); })
+        .attr("height", function(d) { return y(d[0]) - y(d[1]); })
+        .attr("width",x.bandwidth())
+        .on("mouseover", function() { tooltip.style("display", null); })
+    .on("mouseout", function() { tooltip.style("display", "none"); })
+    .on("mousemove", function(event,d) {
+      var xPosition = d3.pointer(this)[0] ;
+      var yPosition = d3.pointer(this)[1] ;
+      var val = d[1]-d[0]
+      var tipCat = ''
+      for(x in d.data) {
+        console.log(d.data[x])
+        if(val == d.data[x]) {
+          console.log(d.data[x])
+            tipCat = x
+            break
+        }
+      }
+      //tooltip.attr("transform", "translate(" + event.screenX + "," + event.screenY + ")");
+      tooltip.style("left", (event.screenX + 10) + "px")
+                    .style("top", (event.screenY - 10) + "px")
+                    .style("text-align", "center")
+      var it = val.toString()
+      tooltip.select("text").text( tipCat+ ": " + it)});
+
+
+
+
+// var x = d3.scaleBand()
+//   .domain(stackedData[0].map(function(d) { return d.x; }))
+//   .range([10, width-10], 0.02)
+//     .padding(0.2);
+
+// var y = d3.scaleLinear()
+//   .domain([0, d3.max(stackedData, function(d) {  return d3.max(d, function(d) { return d.y0 + d.y; });  })])
+//   .range([height, 0]);
+
+// var colors = ["b33040", "#d25c4d", "#f2b447", "#d9d574"];
+
+
+// // Define and draw axes
+// var yAxis = d3.axisLeft(y)
+// .ticks(5)
+// .tickSize(-width, 0, 0)
+// .tickFormat( function(d) { return d } );
+
+// var xAxis = d3.axisBottom(x).tickSizeOuter(0);
+
+// svg.append("g")
+//   .attr("class", "y axis")
+//   .call(yAxis);
+
+// svg.append("g")
+//   .attr("class", "x axis")
+//   .attr("transform", "translate(0," + height + ")")
+//   .call(xAxis);
+
+
+  
+//   var groups = svg.selectAll("g.cost")
+//   .data(stackedData)
+//   .enter().append("g")
+//   .attr("class", "cost")
+//   .style("fill", function(d, i) { return colors[i]; });
+
+
+
+
+  // var rect = groups.selectAll("rect")
+  // .data(function(d) { return d; })
+  // .enter()
+  // .append("rect")
+  // .attr("x", function(d) { return x(d.x); })
+  // .attr("y", function(d) { return y(d.y0 + d.y); })
+  // .attr("height", function(d) { return y(d.y0) - y(d.y0 + d.y); })
+  // .attr("width", x.bandwidth())
+  // .on("mouseover", function() { tooltip.style("display", null); })
+  // .on("mouseout", function() { tooltip.style("display", "none"); })
+  // .on("mousemove", function(d) {
+  //   var xPosition = d3.mouse(this)[0] - 15;
+  //   var yPosition = d3.mouse(this)[1] - 25;
+  //   tooltip.attr("transform", "translate(" + xPosition + "," + yPosition + ")");
+  //   tooltip.select("text").text(d.y);
+  // });
+
+
+
+
+//Draw legend
+var legend = svg.selectAll(".legend")
+  .data(colors)
+  .enter().append("g")
+  .attr("class", "legend")
+  .attr("transform", function(d, i) { return "translate(30," + i * 19 + ")"; });
+ 
+legend.append("rect")
+  .attr("x", width - 18)
+  .attr("width", 18)
+  .attr("height", 18)
+  .style("fill", function(d, i) {return colors.slice().reverse()[i];});
+ 
+legend.append("text")
+  .attr("x", width + 5)
+  .attr("y", 9)
+  .attr("dy", ".35em")
+  .style("font-size", "10px")
+  .style("text-anchor", "start")
+  .text(function(d, i) { 
+    console.log(i)
+    return ky[i]
   });
-}));
+
+
+const tooltip = d3.select("#my_dataviz").append("div")
+                .style("display", "none")
+                .attr("class", "tooltip")
+                .style("background-color", "white")
+                .style("border", "solid")
+                .style("border-width", "2px")
+                .style("border-radius", "5px")
+                .style("padding", "5px")
+                .style("position", "absolute")
 
 
     
-    var parse = d3.time.format("%Y").parse;
+tooltip.append("rect")
+.attr("width", 300)
+  .attr("height", 20)
+  .attr("fill", "white")
+  .style("opacity", 1);
 
+tooltip.append("text")
+  .attr("x", 30)
+  .attr("dy", "1.2em")
+  .style("text-anchor", "middle")
+  .style("font-size", "24px")
+  .style("font-weight", "bold");
+  
 
-// append the svg object to the body of the page
-var svg = d3.select("#my_dataviz")
-  .append("svg")
-    .attr("width", width + margin.left + margin.right)
-    .attr("height", height + margin.top + margin.bottom)
-  .append("g")
-    .attr("transform",
-          "translate(" + margin.left + "," + margin.top + ")");
-
-// Parse the Data
-    //console.log(carpark)
-    tr ='<tr>'
-    markup = ''
-
-    for(var key in carpark) {
-      // console.log(key)
-       item = carpark[key]
-       console.log(item)
-
-
-      
-       metric = "<td>" + key + "</td>" 
-
-       nat = "<td>" + item['national'] + "</td>" 
-       west = "<td>" + item['west'] + "</td>" 
-       east = "<td>" + item['east'] + "</td>" 
-       central = "<td>" + item['central'] + "</td>" 
-       north = "<td>" + item['north'] + "</td>" 
-       south = "<td>" + item['south'] + "</td>" 
-       markup = markup + tr + metric + nat + north + south + east + west +  central +'</tr>'
-    }
-
-  });
-
-
+});
 </script>
 </body>
 </html>
