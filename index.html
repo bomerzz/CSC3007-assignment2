@@ -135,94 +135,37 @@ fetch('https://data.gov.sg/api/action/datastore_search?resource_id=83c21090-bd19
       // enter a second time = loop subgroup per subgroup to add all rectangles
       .data(function(d) { return d; })
       .enter().append("rect")
+        
         .attr("x", function(d) { return x(d.data.year); })
         .attr("y", function(d) { return y(d[1]); })
         .attr("height", function(d) { return y(d[0]) - y(d[1]); })
         .attr("width",x.bandwidth())
         .on("mouseover", function() { tooltip.style("display", null); })
-    .on("mouseout", function() { tooltip.style("display", "none"); })
-    .on("mousemove", function(event,d) {
-      var xPosition = d3.pointer(this)[0] ;
-      var yPosition = d3.pointer(this)[1] ;
-      var val = d[1]-d[0]
-      var tipCat = ''
-      for(x in d.data) {
-        console.log(d.data[x])
-        if(val == d.data[x]) {
-          console.log(d.data[x])
-            tipCat = x
-            break
-        }
-      }
-      //tooltip.attr("transform", "translate(" + event.screenX + "," + event.screenY + ")");
-      tooltip.style("left", (event.screenX + 10) + "px")
-                    .style("top", (event.screenY - 10) + "px")
-                    .style("text-align", "center")
-      var it = val.toString()
-      tooltip.select("text").text( tipCat+ ": " + it)});
+        .on("mouseout", function() { tooltip.style("display", "none"); })
+        .on("mousemove", function(event,d) {
+          var xPosition = d3.pointer(this)[0] ;
+          var yPosition = d3.pointer(this)[1] ;
+          var val = d[1]-d[0]
+          var tipCat = ''
+          for(x in d.data) {
+            console.log(d.data[x])
+            if(val == d.data[x]) {
+              console.log(d.data[x])
+                tipCat = x
+                break
+            }
+          }
+          //tooltip.attr("transform", "translate(" + event.screenX + "," + event.screenY + ")");
+          tooltip.style("left", (event.screenX + 10) + "px")
+                        .style("top", (event.screenY - 10) + "px")
+                        .style("text-align", "center")
+          var it = val.toString()
+          tooltip.select("text").text( tipCat+ ": " + it)});
 
 
-
-
-// var x = d3.scaleBand()
-//   .domain(stackedData[0].map(function(d) { return d.x; }))
-//   .range([10, width-10], 0.02)
-//     .padding(0.2);
-
-// var y = d3.scaleLinear()
-//   .domain([0, d3.max(stackedData, function(d) {  return d3.max(d, function(d) { return d.y0 + d.y; });  })])
-//   .range([height, 0]);
-
-// var colors = ["b33040", "#d25c4d", "#f2b447", "#d9d574"];
-
-
-// // Define and draw axes
-// var yAxis = d3.axisLeft(y)
-// .ticks(5)
-// .tickSize(-width, 0, 0)
-// .tickFormat( function(d) { return d } );
-
-// var xAxis = d3.axisBottom(x).tickSizeOuter(0);
-
-// svg.append("g")
-//   .attr("class", "y axis")
-//   .call(yAxis);
-
-// svg.append("g")
-//   .attr("class", "x axis")
-//   .attr("transform", "translate(0," + height + ")")
-//   .call(xAxis);
 
 
   
-//   var groups = svg.selectAll("g.cost")
-//   .data(stackedData)
-//   .enter().append("g")
-//   .attr("class", "cost")
-//   .style("fill", function(d, i) { return colors[i]; });
-
-
-
-
-  // var rect = groups.selectAll("rect")
-  // .data(function(d) { return d; })
-  // .enter()
-  // .append("rect")
-  // .attr("x", function(d) { return x(d.x); })
-  // .attr("y", function(d) { return y(d.y0 + d.y); })
-  // .attr("height", function(d) { return y(d.y0) - y(d.y0 + d.y); })
-  // .attr("width", x.bandwidth())
-  // .on("mouseover", function() { tooltip.style("display", null); })
-  // .on("mouseout", function() { tooltip.style("display", "none"); })
-  // .on("mousemove", function(d) {
-  //   var xPosition = d3.mouse(this)[0] - 15;
-  //   var yPosition = d3.mouse(this)[1] - 25;
-  //   tooltip.attr("transform", "translate(" + xPosition + "," + yPosition + ")");
-  //   tooltip.select("text").text(d.y);
-  // });
-
-
-
 
 //Draw legend
 var legend = svg.selectAll(".legend")
@@ -274,7 +217,6 @@ tooltip.append("text")
   .style("font-size", "24px")
   .style("font-weight", "bold");
   
-
 });
 </script>
 </body>
