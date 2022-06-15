@@ -7,23 +7,27 @@
 
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css">
 
-<!-- <style>
-    table, th, td {
-        border: 1px solid black;
-        border-collapse: collapse;
-    }
-    
-    p {
-        font-family: "Arial";
-    }
-  .HighUtil{
-      color: red;
-    }
-    .dataIssue {
-        background-color: yellow;
-    }
-    tr:nth-child(even) {background-color:grey;}
-</style> -->
+<style type="text/css">
+  svg {
+    font: 10px sans-serif;
+    shape-rendering: crispEdges;
+  }
+
+  .axis path,
+  .axis line {
+    fill: none;
+    stroke: #000;
+  }
+ 
+  path.domain {
+    stroke: none;
+  }
+ 
+  .y .tick line {
+    stroke: #ddd;
+  }
+  </style>
+
 </head>
 <body>
 
@@ -40,13 +44,28 @@
 
 <script>
 
+var margin = {top: 20, right: 160, bottom: 35, left: 30};
+
+var width = 960 - margin.left - margin.right,
+    height = 500 - margin.top - margin.bottom;
+
+var svg = d3.select("my_dataviz")
+  .append("svg")
+  .attr("width", width + margin.left + margin.right)
+  .attr("height", height + margin.top + margin.bottom)
+  .append("g")
+  .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+
+
 fetch('https://data.gov.sg/api/action/datastore_search?resource_id=83c21090-bd19-4b54-ab6b-d999c251edcf')
   .then(response => response.json())
   .then(data => {
     let carpark = data.result.records;
-    var margin = {top: 10, right: 30, bottom: 20, left: 50},
-    width = 460 - margin.left - margin.right,
-    height = 400 - margin.top - margin.bottom;
+
+    
+    var parse = d3.time.format("%Y").parse;
+
 
 // append the svg object to the body of the page
 var svg = d3.select("#my_dataviz")
